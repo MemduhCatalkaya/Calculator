@@ -4,31 +4,83 @@ second_number = 0.0
 calculation = ""
 equal = True
 no_number = True
+string_on = False
+equal2 = True
+BG = "#BFBFBF"
 
 screen = tk.Tk()
 screen.configure(bg="white")
+screen.title("Calculator")
 
-display = tk.Entry(width=18, font=("times new roman", 40), state="disabled",
-                   disabledbackground="white", disabledforeground="black")
+calculator_frame = tk.Frame(screen, bg=BG, padx=15, pady=15, relief="raised", border=12)
+calculator_frame.pack()
+
+display = tk.Entry(calculator_frame, width=18, font=("times new roman", 40), state="disabled",
+                   disabledbackground="white", disabledforeground="black", relief="sunken", border=8)
 display.pack(pady=5, padx=5)
 
-info_frame = tk.Frame(bg="white")
+info_frame = tk.Frame(calculator_frame, bg=BG)
 info_frame.pack()
 
 display_fn = tk.Entry(info_frame, width=10, font=("times new roman", 30), state="disabled",
-                      disabledbackground="#EEEEEE", disabledforeground="black")
+                      disabledbackground="#EEEEEE", disabledforeground="black", relief="sunken", border=8)
 display_fn.grid(row=0, column=0, padx=3, pady=3)
 display_cal = tk.Entry(info_frame, width=2, font=("times new roman", 20), state="disabled",
-                       disabledbackground="#EEEEEE", disabledforeground="black")
+                       disabledbackground="#EEEEEE", disabledforeground="black", relief="sunken", border=8)
 display_cal.grid(row=0, column=1, padx=3, pady=3)
 display_sn = tk.Entry(info_frame, width=10, font=("times new roman", 30), state="disabled",
-                      disabledbackground="#EEEEEE", disabledforeground="black")
+                      disabledbackground="#EEEEEE", disabledforeground="black", relief="sunken", border=8)
 display_sn.grid(row=0, column=2, padx=3, pady=3)
 
 
+def factorial_calculation(f):
+    if f == 0:
+        return 1.0
+    else:
+        return f * factorial_calculation(f-1)
+
+
+def factorial():
+    global equal, string_on
+    try:
+        n = float(display.get())
+        int_number = int(n)
+        if n == int_number:
+            if 170 >= n >= 0:
+                num = factorial_calculation(n)
+                display["state"] = "normal"
+                display.delete(0, tk.END)
+                display.insert(tk.END, num)
+                display["state"] = "disabled"
+            elif n > 170:
+                display["state"] = "normal"
+                display.delete(0, tk.END)
+                display.insert(tk.END, "INF!!")
+                display["state"] = "disabled"
+                equal = False
+                string_on = True
+            else:
+                display["state"] = "normal"
+                display.delete(0, tk.END)
+                display.insert(tk.END, "Negative Number!!")
+                display["state"] = "disabled"
+                equal = False
+                string_on = True
+        else:
+            display["state"] = "normal"
+            display.delete(0, tk.END)
+            display.insert(tk.END, "Float Number!")
+            display["state"] = "disabled"
+            equal = False
+            string_on = True
+    except ValueError:
+        pass
+    except OverflowError:
+        pass
+
+
 def number_click(x):
-    global equal
-    global no_number
+    global equal, no_number, string_on
     if equal:
         display["state"] = "normal"
         display.insert(tk.END, x)
@@ -42,6 +94,7 @@ def number_click(x):
         display_sn.delete(0, tk.END)
         display_sn["state"] = "disabled"
         equal = True
+        string_on = False
     no_number = False
 
 
@@ -49,7 +102,7 @@ def dot_click(x):
     if "." in display.get():
         pass
     else:
-        global equal
+        global equal, string_on
         if equal:
             display["state"] = "normal"
             display.insert(tk.END, x)
@@ -60,14 +113,14 @@ def dot_click(x):
             display.insert(tk.END, x)
             display["state"] = "disabled"
             equal = True
+            string_on = False
 
 
 def prc_click(prc):
-    if no_number:
+    if no_number or string_on:
         pass
     else:
-        global first_number
-        global calculation
+        global first_number, calculation, equal2
         if calculation == prc:
             pass
         elif calculation == "":
@@ -94,6 +147,7 @@ def prc_click(prc):
             display_sn["state"] = "normal"
             display_sn.delete(0, tk.END)
             display_sn["state"] = "disabled"
+            equal2 = True
         else:
             calculation = prc
             display_cal["state"] = "normal"
@@ -115,11 +169,10 @@ def minus_click():
         display.insert(0, "-")
         display["state"] = "disabled"
     else:
-        if no_number:
+        if no_number or string_on:
             pass
         else:
-            global first_number
-            global calculation
+            global first_number, calculation, equal2
             if calculation == "-":
                 pass
             elif calculation == "":
@@ -139,6 +192,7 @@ def minus_click():
                 display_sn["state"] = "normal"
                 display_sn.delete(0, tk.END)
                 display_sn["state"] = "disabled"
+                equal2 = True
             else:
                 calculation = "-"
                 display_cal["state"] = "normal"
@@ -148,16 +202,15 @@ def minus_click():
 
 
 def equal_click():
-    global equal
+    global equal, equal2
     if not equal:
         pass
     else:
-        if first_number == 0:
+        if first_number == 0 or not equal2:
             pass
         else:
             try:
-                global second_number
-                global calculation
+                global second_number, calculation
                 equal = False
                 math = ""
                 second_number = display.get()
@@ -184,13 +237,14 @@ def equal_click():
                 display_cal["state"] = "normal"
                 display_cal.delete(0, tk.END)
                 display_cal["state"] = "disabled"
+                equal2 = False
             except ValueError:
                 pass
 
 
 def clear_all():
     global first_number, second_number, display, calculation
-    global equal, no_number
+    global equal, no_number, string_on
     first_number = 0.0
     second_number = 0.0
     calculation = ""
@@ -208,9 +262,19 @@ def clear_all():
     display["state"] = "disabled"
     equal = True
     no_number = True
+    string_on = False
 
 
-Button_Frame = tk.Frame(screen, bg="white")
+def clear():
+    if string_on:
+        clear_all()
+    else:
+        display["state"] = "normal"
+        display.delete(len(display.get())-1, tk.END)
+        display["state"] = "disabled"
+
+
+Button_Frame = tk.Frame(calculator_frame, bg=BG)
 Button_Frame.pack(padx=10, pady=10)
 
 Button_7 = tk.Button(Button_Frame, text=7, width=6, height=2,
@@ -293,20 +357,20 @@ Button_divide = tk.Button(Button_Frame, text="÷", width=6, height=2,
                           command=lambda a="/": prc_click(a), bg="#DCDCDC")
 Button_divide.grid(row=1, column=3, padx=3, pady=3)
 
+Button_clear_all = tk.Button(Button_Frame, text="CA", width=6, height=2,
+                             font=("times new roman", 18, "bold"), borderwidth=5, border=5,
+                             command=clear_all, bg="#DCDCDC")
+Button_clear_all.grid(row=0, column=3, padx=3, pady=3)
+
 Button_clear = tk.Button(Button_Frame, text="C", width=6, height=2,
                          font=("times new roman", 18, "bold"), borderwidth=5, border=5,
-                         command=clear_all, bg="#DCDCDC")
-Button_clear.grid(row=0, column=3, padx=3, pady=3)
+                         command=clear, bg="#DCDCDC")
+Button_clear.grid(row=0, column=0, padx=3, pady=3)
 
-Button_parentheses1 = tk.Button(Button_Frame, text="", width=6, height=2,
-                                font=("times new roman", 18, "bold"), borderwidth=5, border=5,
-                                state="disabled", bg="#DCDCDC")
-Button_parentheses1.grid(row=0, column=0, padx=3, pady=3)
-
-Button_parentheses2 = tk.Button(Button_Frame, text="", width=6, height=2,
-                                font=("times new roman", 18, "bold"), borderwidth=5, border=5,
-                                state="disabled", bg="#DCDCDC")
-Button_parentheses2.grid(row=0, column=1, padx=3, pady=3)
+Button_factorial = tk.Button(Button_Frame, text="n!", width=6, height=2,
+                             font=("times new roman", 18, "bold"), borderwidth=5, border=5,
+                             bg="#DCDCDC", command=factorial)
+Button_factorial.grid(row=0, column=1, padx=3, pady=3)
 
 Button_percent = tk.Button(Button_Frame, text="%", width=6, height=2,
                            font=("times new roman", 18, "bold"), borderwidth=5, border=5,
