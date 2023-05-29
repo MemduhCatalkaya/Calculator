@@ -158,8 +158,8 @@ def minus_click():
 
 
 def equal_click():
-    global equal_clickable, equal_clickable_2, second_number, calculation, calculation_on
-    if equal_clickable and equal_clickable_2 and not first_number == 0:
+    global equal_clickable, equal_clickable_2, second_number, calculation, calculation_on, string_on
+    if equal_clickable and equal_clickable_2 and not first_number == 0.0:
         try:
             global second_number, calculation
             math = ""
@@ -188,6 +188,13 @@ def equal_click():
             second_number = 0.0
         except ValueError:
             pass
+        except ZeroDivisionError:
+            clear_all()
+            display["state"] = "normal"
+            display.insert(tk.END, "Zero Division!!")
+            display["state"] = "disabled"
+            string_on = True
+            equal_clickable = False
     else:
         pass
 
